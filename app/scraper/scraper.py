@@ -5,6 +5,7 @@ VALID_SITES = [
     'amazon',
     'bestbuy',
     'flipkart',
+    'ebay'
 ]
 
 
@@ -48,7 +49,7 @@ def parse_site(url: str) -> str or None:
     return None
 
 
-def scrape(url: str) -> list[str] or None:
+def scrape(url: str, n: int = 20) -> list[str] or None:
     site = parse_site(url)
     if not site:
         return None
@@ -56,5 +57,13 @@ def scrape(url: str) -> list[str] or None:
     if site == 'amazon':
         from .amazon import Amazon
         a = Amazon(url)
+        return a.get_reviews(n)
+    elif site == 'ebay':
+        from .ebay import Ebay
 
-        return a.get_reviews()
+        e = Ebay(url)
+        r = e.get_product_info()
+        r['reviews'] = e.get_reviews(n)
+        return r
+    else:
+        return None

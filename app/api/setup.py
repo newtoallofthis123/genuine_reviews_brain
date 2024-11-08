@@ -17,16 +17,21 @@ def ping():
 
 @api.route('/scrape')
 def scrape_route():
+    req = request.get_json()
     if 'url' in request.args:
         url = request.args['url']
     else:
-        req = request.get_json()
-        url = req['url']
+        url = req.get('url', '')
+
+    if 'n' in request.args:
+        n = request.args['n']
+    else:
+        n = req.get('n', 20)
+
     if url == '':
         return jsonify({'message': 'URL is required'}), 400
 
-    res = scrape(url)
-    print(res)
+    res = scrape(url, n)
 
     if not res:
         return jsonify({'message': 'Invalid URL'}), 400
