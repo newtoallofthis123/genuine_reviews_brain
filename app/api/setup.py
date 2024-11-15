@@ -2,22 +2,23 @@ from flask import Flask, jsonify, Blueprint, request
 
 from app.scraper.scraper import scrape
 from app.scraper.utils import get_html
+from app.ntg import predict_review
 
 app = Flask(__name__)
 
-api = Blueprint('api', __name__, url_prefix='/api/v1')
 
 @app.route('/')
 def hello():
     return 'Genuine Reviews API v1.0'
 
-@api.route('/ping')
-def ping():
-    return jsonify({'message': 'pong'})
 
-@api.route('/scrape')
+@app.route('/scrape')
 def scrape_route():
-    req = request.get_json()
+    try:
+        req = request.get_json()
+    except:
+        req = {}
+
     if 'url' in request.args:
         url = request.args['url']
     else:
@@ -33,12 +34,19 @@ def scrape_route():
 
     res = scrape(url, n)
 
+    print("Got results: ", res)
+    comments = [i['body'] for i in res['reviews']]
+
+    predicted = predict_review(comments)
+
+    for i, review in enumerate(res['reviews']):
+        review['fake'] = predicted[i]
+
     if not res:
         return jsonify({'message': 'Invalid URL'}), 400
 
-    return res
+    return jsonify(res), 200
 
-app.register_blueprint(api)
 
 def run_debug():
     app.run(debug=True)

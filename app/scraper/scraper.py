@@ -1,4 +1,4 @@
-# List of all of the valid sites supported by the parser
+# List of all the valid sites supported by the parser
 import re
 
 VALID_SITES = [
